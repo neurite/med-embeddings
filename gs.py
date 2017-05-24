@@ -17,7 +17,14 @@ def tokenize(text):
     return simple_preprocess(text)
 
 
-def tag_docs(df, label_col='label', text_col='text'):
+def tagdoc(row, label_col='label', text_col='text'):
+    label = str(row[label_col])
+    text = str(row[text_col])
+    words = tokenize(text)
+    return TaggedDocument(words, [label])
+
+
+def tagdocs(df, label_col='label', text_col='text'):
     """
  
     Converts the data frame into a list of tagged lines. For each row in
@@ -30,13 +37,8 @@ def tag_docs(df, label_col='label', text_col='text'):
     return: list of gensim TaggedDocument
 
     """
-    tagged_lines = []
-    for idx, row in df.iterrows():
-        label = str(row[label_col])
-        text = str(row[text_col])
-        tagged_lines.append(
-            TaggedDocument(tokenize(text), [label]))
-    return tagged_lines
+    return [tagdoc(row, label_col, text_col)
+            for idx, row in df.iterrows()]
 
 
 def top_docs(text, model, topn=10):
@@ -51,8 +53,8 @@ def top_docs(text, model, topn=10):
 
     """
     words = tokenize(text)
-    return model.docvecs.most_similar(
-            [model.infer_vector(words)], topn=topn)
+    vector = model.infer_vector(words)
+    return model.docvecs.most_similar([vector], topn=topn)
 
 
 def test_model(df, model, label_col='label', text_col='text', topn=2):
