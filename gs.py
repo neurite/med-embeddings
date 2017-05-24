@@ -35,7 +35,7 @@ def tag_docs(df, label_col='label', text_col='text'):
         label = str(row[label_col])
         text = str(row[text_col])
         tagged_lines.append(
-            TaggedDocument(simple_preprocess(text), [label]))
+            TaggedDocument(tokenize(text), [label]))
     return tagged_lines
 
 
@@ -59,7 +59,7 @@ def test_model(df, model, label_col='label', text_col='text', topn=2):
     """
 
     Tests the model using the data frame.
-    
+
     df: DataFrame
     label_col: string, the name of the label column
     text_col: string, the name of the text column
