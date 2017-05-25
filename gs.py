@@ -18,6 +18,12 @@ def tokenize(text):
 
 
 def tagdoc(row, label_col='label', text_col='text'):
+    """
+    row: Series, a row off a data frame
+    label_col: string, the name of the label column
+    text_col: string, the name of the text column
+    return: TaggedDocument
+    """
     label = str(row[label_col])
     text = str(row[text_col])
     words = tokenize(text)
@@ -41,7 +47,7 @@ def tagdocs(df, label_col='label', text_col='text'):
             for idx, row in df.iterrows()]
 
 
-def top_docs(text, model, topn=10):
+def topdocs(text, model, topn=10):
     """
 
     Finds the most similar docs (their labels) given the text and the model.
@@ -57,7 +63,7 @@ def top_docs(text, model, topn=10):
     return model.docvecs.most_similar([vector], topn=topn)
 
 
-def test_model(df, model, label_col='label', text_col='text', topn=2):
+def evaluate(df, model, label_col='label', text_col='text', topn=2):
     """
 
     Tests the model using the data frame.
@@ -67,17 +73,13 @@ def test_model(df, model, label_col='label', text_col='text', topn=2):
     text_col: string, the name of the text column
     model: gensim model to test
     topn: integer
-    return: (total, hits)
+    return: the list of labels, the list of booleans indicating hit
 
     """
-    total, hits = 0, 0
-    for idx, row in df.iterrows():
-        label = row[label_col]
-        text = row[text_col]
-        top_list = top_docs(text, model, topn)
-        total = total + 1
-        for item in top_list:
-            if item[0] == label:
-                hits = hits + 1
-                break
-    return total, hits
+    rows = [row for idx, row in df.iterrows()]
+    labels = [str(row[label_col]) for row in rows]
+    texts = [str(row[text_col]) for row in rows]
+    toplists = [topdocs(text, model, topn) for text in texts]
+    toplists = [set([label for label, score in toplist]) for toplist in toplists]
+    hits = [label in toplist for label, toplist in zip(labels, toplists)]
+    return labels, hits
