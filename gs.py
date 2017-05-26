@@ -47,6 +47,36 @@ def tagdocs(df, label_col='label', text_col='text'):
             for idx, row in df.iterrows()]
 
 
+def listparams(dms=[0], sizes=[50], windows=[5], mincounts=[2],
+                     samples=[1e-5], negatives=[5], workers=4, epochs=100):
+    """
+    return: a list of parameter combinations
+    """
+    return [{
+        'dm': dm,
+        'size': size,
+        'window': window,
+        'min_count': mincount,
+        'sample': sample,
+        'negative': neg,
+        'workers': workers,
+        'iter': epochs
+    } for neg in negatives for sample in samples
+        for mincount in mincounts for window in windows
+        for size in sizes for dm in dms]
+
+
+def train(taggeddocs, models):
+    """
+    taggeddocs: list of TaggedDocument
+    models: list of models
+    return: void
+    """
+    for model in models:
+        model.build_vocab(taggeddocs)
+        model.train(taggeddocs)
+
+
 def topdocs(text, model, topn=10):
     """
 
