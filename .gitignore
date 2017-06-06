@@ -93,3 +93,6 @@ ENV/
 
 # Ignore bin
 /bin/
+
+# Ignore gensim models
+/gensim/
